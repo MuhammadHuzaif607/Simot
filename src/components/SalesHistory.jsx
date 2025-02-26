@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Loading from "./Loading";
-import ProductsModal from "./ProductsModal";
-import * as XLSX from "xlsx";
-import { toast, ToastContainer } from "react-toastify";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Loading from './Loading';
+import ProductsModal from './ProductsModal';
+import * as XLSX from 'xlsx';
+import { toast, ToastContainer } from 'react-toastify';
 
 const SalesHistory = () => {
   const [salesHistory, setSalesHistory] = useState([]);
@@ -13,14 +13,14 @@ const SalesHistory = () => {
   const [selectedSale, setSelectedSale] = useState(null);
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(null);
   const [selectedShipppingCost, setSelectedShipppingCost] = useState(null);
-  const [filterText, setFilterText] = useState("");
-  const [exportDate, setExportDate] = useState("");
+  const [filterText, setFilterText] = useState('');
+  const [exportDate, setExportDate] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
-  const [userRole, setUserRole] = useState("");
-  const [commission, setCommission] = useState("");
-  const [customTotalPrice, setCustomTotalPrice] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [userRole, setUserRole] = useState('');
+  const [commission, setCommission] = useState('');
+  const [customTotalPrice, setCustomTotalPrice] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const fetchSalesHistory = async () => {
     try {
@@ -29,8 +29,9 @@ const SalesHistory = () => {
       );
       setSalesHistory(response.data);
       setLoading(false);
+      console.log('Sales ====>', response.data);
     } catch (error) {
-      setError("Failed to fetch sales history");
+      setError('Failed to fetch sales history');
       setLoading(false);
     }
   };
@@ -40,13 +41,20 @@ const SalesHistory = () => {
     getUserRole();
   }, []);
 
-  const handleViewClick = (products, totalPrice, shipppingCost, commission, customTotalPrice) => {
+  const handleViewClick = (
+    products,
+    totalPrice,
+    shipppingCost,
+    commission,
+    customTotalPrice
+  ) => {
     setSelectedSale(products);
     setSelectedTotalPrice(totalPrice);
-    setSelectedShipppingCost(shipppingCost)
-    setCommission(commission)
-    setCustomTotalPrice(customTotalPrice)
+    setSelectedShipppingCost(shipppingCost);
+    setCommission(commission);
+    setCustomTotalPrice(customTotalPrice);
     setIsModalOpen(true);
+   
   };
 
   const handleCloseModal = () => {
@@ -56,10 +64,10 @@ const SalesHistory = () => {
   };
 
   const capitalize = (str) =>
-    str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+    str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 
   const filteredSalesHistory = salesHistory
-    .filter((sale) => sale.status.toLowerCase() === "delivered")
+    .filter((sale) => sale.status.toLowerCase() === 'delivered')
     .filter((sale) => {
       return (
         sale.customerName.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -74,10 +82,9 @@ const SalesHistory = () => {
     });
 
   const handleExport = async () => {
-
     // console.log("first")
     if (!startDate || !endDate) {
-      toast.error("Please select a start and end date to export data.");
+      toast.error('Please select a start and end date to export data.');
       return;
     }
 
@@ -88,21 +95,21 @@ const SalesHistory = () => {
       const end = new Date(endDate);
 
       if (isNaN(start) || isNaN(end)) {
-        alert("Invalid date range selected.");
+        alert('Invalid date range selected.');
         return;
       }
 
       // Remove time from start and end dates
-      const startDateOnly = start.toISOString().split("T")[0];
-      const endDateOnly = end.toISOString().split("T")[0];
+      const startDateOnly = start.toISOString().split('T')[0];
+      const endDateOnly = end.toISOString().split('T')[0];
 
       const dataToExport = salesHistory.filter((sale) => {
         // Convert sale time to date format
         const saleDate = new Date(sale.time);
-        const saleDateOnly = saleDate.toISOString().split("T")[0];
+        const saleDateOnly = saleDate.toISOString().split('T')[0];
 
         return (
-          sale.status.toLowerCase() === "delivered" &&
+          sale.status.toLowerCase() === 'delivered' &&
           saleDateOnly >= startDateOnly &&
           saleDateOnly <= endDateOnly
         );
@@ -123,8 +130,8 @@ const SalesHistory = () => {
       // await deleteSalesData(idsToDelete);
       await fetchSalesHistory();
     } catch (error) {
-      console.error("Error exporting data:", error);
-      setError("Error exporting data");
+      console.error('Error exporting data:', error);
+      setError('Error exporting data');
     } finally {
       setExportLoading(false);
     }
@@ -136,13 +143,13 @@ const SalesHistory = () => {
       .map((sale) => {
         // Expand each product's details into separate columns
         return sale.products.map((product) => ({
-          "Date & Time": `${new Date(
+          'Date & Time': `${new Date(
             sale.time
           ).toLocaleDateString()} ${new Date(sale.time).toLocaleTimeString()}`,
-          "Customer Name": sale.customerName,
-          "Shipment Number": sale.shipmentNumber,
+          'Customer Name': sale.customerName,
+          'Shipment Number': sale.shipmentNumber,
           Brand: product.brand,
-          "Device Type": product.deviceType,
+          'Device Type': product.deviceType,
           Model: product.model,
           IMEI: product.imei,
           Condition: product.condition,
@@ -150,14 +157,14 @@ const SalesHistory = () => {
           Color: product.color,
           Memory: product.memory,
           Information: product.info,
-          "Total Price": sale.totalPrice,
+          'Total Price': sale.totalPrice,
         }));
       })
       .flat(); // Flatten the array to ensure each row is represented correctly
     // Create a new worksheet and add the formatted data
     const ws = XLSX.utils.json_to_sheet(formattedData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sales History");
+    XLSX.utils.book_append_sheet(wb, ws, 'Sales History');
 
     // Write the Excel file
     XLSX.writeFile(wb, filename);
@@ -175,37 +182,37 @@ const SalesHistory = () => {
           (product) =>
             `${product.brand}, ${product.deviceType}, ${product.model},${product.imei}, ${product.condition}, ${product.grade}, ${product.color}, ${product.memory}, ${product.info}`
         )
-        .join(" | "),
+        .join(' | '),
       totalPrice: sale.totalPrice,
     }));
 
     const headers = [
-      "Date & Time",
-      "Customer Name",
-      "Shipment Number",
-      "Brand",
-      "Device Type",
-      "Model",
-      "IMEI",
-      "Condition",
-      "Grade",
-      "Color",
-      "Memory",
-      "Information",
-      "Total Price",
+      'Date & Time',
+      'Customer Name',
+      'Shipment Number',
+      'Brand',
+      'Device Type',
+      'Model',
+      'IMEI',
+      'Condition',
+      'Grade',
+      'Color',
+      'Memory',
+      'Information',
+      'Total Price',
     ];
 
     const csvContent =
-      "data:text/csv;charset=utf-8," +
+      'data:text/csv;charset=utf-8,' +
       [
-        headers.join(","),
-        ...csvData.map((row) => Object.values(row).join(",")),
-      ].join("\n");
+        headers.join(','),
+        ...csvData.map((row) => Object.values(row).join(',')),
+      ].join('\n');
 
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -218,25 +225,25 @@ const SalesHistory = () => {
         { data: { ids } }
       );
       if (response.status !== 200)
-        throw new Error("Failed to delete sales data.");
+        throw new Error('Failed to delete sales data.');
     } catch (error) {
-      console.error("Error deleting sales data:", error);
+      console.error('Error deleting sales data:', error);
       throw error;
     }
   };
 
   const getUserRole = () => {
-    const userDataString = localStorage.getItem("user");
+    const userDataString = localStorage.getItem('user');
     if (userDataString) {
       try {
         const userData = JSON.parse(userDataString);
         const role = userData.user.role;
         setUserRole(role);
       } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
+        console.error('Error parsing user data from localStorage:', error);
       }
     } else {
-      console.error("No user data found in localStorage");
+      console.error('No user data found in localStorage');
     }
   };
 
@@ -257,8 +264,8 @@ const SalesHistory = () => {
       <div className="flex justify-center p-4">
         <h1 className="text-4xl text-center">Delivered Sales</h1>
       </div>
-<ToastContainer/>
-      {userRole == "superadmin" && (
+      <ToastContainer />
+      {userRole == 'superadmin' && (
         <div className="flex justify-end mb-4">
           {/*    <input
             type="date"
@@ -282,9 +289,8 @@ const SalesHistory = () => {
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
             onClick={handleExport}
-            
           >
-            {exportLoading ? "Exporting..." : "Export"}
+            {exportLoading ? 'Exporting...' : 'Export'}
           </button>
         </div>
       )}
@@ -326,7 +332,13 @@ const SalesHistory = () => {
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded"
                       onClick={() =>
-                        handleViewClick(sale.products, sale.totalPrice, sale.shippingCost, sale.commission, sale.customTotalPrice)
+                        handleViewClick(
+                          sale,
+                          sale.totalPrice,
+                          sale.shippingCost,
+                          sale.commission,
+                          sale.customTotalPrice
+                        )
                       }
                     >
                       View

@@ -5,7 +5,6 @@ import {
   Route,
   BrowserRouter as Router,
   Routes,
-  Navigate,
 } from "react-router-dom";
 import Dashboard from "./components/Dashboard.jsx";
 import AddStock from "./components/AddStock.jsx";
