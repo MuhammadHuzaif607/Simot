@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Add this CSS code to your stylesheet */
+.status-dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 100%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.status-ready {
+  background-color: green;
+}
+
+.status-repair {
+  background-color: orange;
+}
+
+.status-scheduled {
+  background-color: red;
+}
+.status-Confirmation {
+  background-color: black;
+}
+.status-reserved{
+  background-color: white;
+}
+
+.fixed {
+  position: fixed;
+  inset: 0; /* Covers the entire screen */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50; /* Ensure it appears above other elements */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+}

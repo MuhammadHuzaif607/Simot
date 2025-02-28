@@ -1,0 +1,57 @@
+.sidebar-link {
+  @apply block w-full h-[50px] py-3 px-4 rounded-md text-white transition-colors duration-300 text-left;
+}
+
+.sidebar-link:hover {
+  @apply rounded-md;
+  background: linear-gradient(90deg, #0172be 0%, #0f9bee 100%);
+}
+
+.sidebar-link-active {
+  @apply font-semibold;
+}
+
+.dark-gray {
+  background: linear-gradient(180deg, #26282b 0%, #0b0b0b 100%);
+}
+.button-color {
+  background: linear-gradient(90deg, #0172be 0%, #0f9bee 100%);
+}
+
+.main-bg {
+  background: linear-gradient(270deg, #2c3036 0%, #31343c 100%);
+}
+.search-bar {
+  background: linear-gradient(90deg, #26282b 0%, #0b0b0b 100%);
+}
+
+.dashboard-box {
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 4px 4px #000000;
+  border-radius: 10px;
+}
+
+
+
+
+/* Custom CSS for tab component */
+
+.custom-appbar {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0px 4px 4px #000000 !important;
+  border-radius: 10px !important;
+}
+
+/* Override Tabs indicator styles */
+.custom-tabs .MuiTabs-indicator {
+  background-color: transparent !important;
+}
+
+/* Override Tab styles */
+.custom-tab {
+  color: white !important;
+}
+
+.custom-tab.Mui-selected {
+  color: #0f9bee !important;
+}
