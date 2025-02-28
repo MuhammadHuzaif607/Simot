@@ -306,7 +306,7 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                 >
                   Cost Table (Techinican)
                 </Link>
-                {userRole === "superadmin" && (
+                {/* {userRole === "superadmin" && (
                 <li>
                   <Link
                     to="/deletedata"
@@ -318,7 +318,7 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                     Delete Devices
                   </Link>
                 </li>
-              )}
+              )} */}
               </li>)}
             </>
           )}
