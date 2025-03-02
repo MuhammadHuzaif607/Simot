@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -46,6 +46,8 @@ const Dashboard = () => {
   const [technicianMonthlyCost, setTechnicianMonthlyCost] = useState(0); // Fixed monthly cost per technician
 
   useEffect(() => {
+
+    
     const fetchDashboardData = async () => {
       try {
         // Fetch products data
@@ -163,7 +165,7 @@ const Dashboard = () => {
         // Calculate net totals (sales minus technician costs)
         setYearlyNetTotal(totalYearlySales - technicianYearlyCost);
         setMonthlyNetTotal(totalMonthlySales - technicianMonthlyCost);
-        setSalesThisMonth(totalMonthlySales);
+        setSalesThisMonth(smartQuantity + tabletQuantity + laptopQuantity);
       } catch (error) {
         console.error("Failed to fetch sales history", error);
       }
@@ -266,7 +268,7 @@ const Dashboard = () => {
           <div>
             <p>net total for the year</p>
             <h3 className="text-2xl font-bold">
-              {formatMoney(yearlyNetTotal)}
+              {formatMoney(yearlyNetTotal) ? formatMoney(yearlyNetTotal) : '' }
             </h3>
           </div>
         </div>

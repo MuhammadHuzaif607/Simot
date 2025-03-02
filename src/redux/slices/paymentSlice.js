@@ -173,6 +173,20 @@ export const editDevice = createAsyncThunk(
   }
 );
 
+export const fetchSoldRepairedProducts = createAsyncThunk(
+  'payments/fetchSoldRepairedProducts',
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/sales/getsalesofrepairedproducts`
+      );
+      return response.data.products;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const paymentSlice = createSlice({
   name: 'payments',
   initialState: {
@@ -181,6 +195,7 @@ const paymentSlice = createSlice({
     fullStory: [],
     groupedDevices: [],
     groupedPayments: [], // New state for grouped payments by technician & date
+    soldRepairedProducts: [],
     invoice: null,
     status: 'idle',
     error: null,
@@ -311,6 +326,18 @@ const paymentSlice = createSlice({
       .addCase(editDevice.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+      .addCase(fetchSoldRepairedProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSoldRepairedProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.soldRepairedProducts = action.payload; // Set the devices with "To Pay" status
+      })
+      .addCase(fetchSoldRepairedProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Something went wrong';
       });
   },
 });

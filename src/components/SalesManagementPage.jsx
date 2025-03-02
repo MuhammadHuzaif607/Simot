@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { BarcodeScanner } from "react-barcode-scanner"; // Import the BarcodeScanner
-import BillModal from "./BillModal"; // Import the BillModal component
-import { CircularProgress } from "@mui/material";
-import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toast
-import { ToastContainer, toast } from "react-toastify"; // Import Toast components
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { BarcodeScanner } from 'react-barcode-scanner'; // Import the BarcodeScanner
+import BillModal from './BillModal'; // Import the BillModal component
+import { CircularProgress } from '@mui/material';
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS for Toast
+import { ToastContainer, toast } from 'react-toastify'; // Import Toast components
 
 const SalesManagementPage = () => {
   const [formData, setFormData] = useState({
-    customerName: "",
-    customerId: "",
-    shipmentNumber: "",
-    productName: "",
-    productPrice: "",
-    commission: "",
-    shippingCost :""
+    customerName: '',
+    customerId: '',
+    shipmentNumber: '',
+    productName: '',
+    productPrice: '',
+    commission: '',
+    shippingCost: '',
   });
 
   const [sales, setSales] = useState([]);
@@ -23,13 +23,14 @@ const SalesManagementPage = () => {
   const [showModal, setShowModal] = useState(false); // For controlling Bill Modal
   const [bill, setBill] = useState(false); // For controlling Bill Modal
   const [loading, setLoading] = useState(false); // For controlling Bill Modal
-  const [errorMessage, setErrorMessage] = useState(""); // Error message state
+  const [errorMessage, setErrorMessage] = useState(''); // Error message state
   const [isScanning, setIsScanning] = useState(false); // Scanner state
-  const [customTotalPrice, setCustomTotalPrice] = useState(""); // To track custom price
-  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [customTotalPrice, setCustomTotalPrice] = useState(''); // To track custom price
+  const [confirmationMessage, setConfirmationMessage] = useState('');
   const [billData, setBillData] = useState({});
   const dropdownRef = useRef(null);
   const shipmentRef = useRef(null);
+
   // Fetch all customers on component mount
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -39,7 +40,7 @@ const SalesManagementPage = () => {
         );
         setCustomers(response.data);
       } catch (error) {
-        console.error("Error fetching customers:", error);
+        console.error('Error fetching customers:', error);
       }
     };
 
@@ -54,16 +55,16 @@ const SalesManagementPage = () => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownRef]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
 
-    if (id === "customerName") {
+    if (id === 'customerName') {
       const suggestions = customers.filter((customer) =>
         customer.customerName.toLowerCase().includes(value.toLowerCase())
       );
@@ -75,8 +76,6 @@ const SalesManagementPage = () => {
       [id]: value,
     }));
   };
-
-  // console.log(formData);
 
   const handleCustomerSelect = (customer) => {
     setFormData((prevData) => ({
@@ -90,10 +89,6 @@ const SalesManagementPage = () => {
 
   const handleAddProduct = async () => {
     if (formData.productName && formData.customerName && formData.customerId) {
-      console.log(formData.productName);
-      console.log(formData.customerName);
-      console.log(formData.customerId);
-      
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/products/getproducts/${
@@ -117,7 +112,9 @@ const SalesManagementPage = () => {
           imei: product.imei,
           info: product.info,
           productPrice: parseFloat(product.price),
-          repairInfo : product.repairInfo
+          repairInfo: product.repairInfo,
+          paymentStatus: product.paymentStatus,
+          status: product.status,
           // parseFloat(product.price) * (parseFloat(formData.commission) / 100),
         };
 
@@ -125,23 +122,22 @@ const SalesManagementPage = () => {
 
         // Clear product fields only after the sale is added
 
-        setErrorMessage(""); // Clear any previous error message
+        setErrorMessage(''); // Clear any previous error message
 
         // setCustomTotalPrice(product.price);
       } catch (error) {
-        console.error("Error fetching product:", error);
-        
+        console.error('Error fetching product:', error);
+
         if (error.response && error.response.status === 404) {
-          setErrorMessage("Product not Available");
+          setErrorMessage('Product not Available');
         } else {
           // General error handling
-          setErrorMessage("An error occurred while fetching the product.");
+          setErrorMessage('An error occurred while fetching the product.');
         }
-      
       }
     } else {
       // Set an error message if fields are not filled
-      setErrorMessage("Please enter product name and select customer.");
+      setErrorMessage('Please enter product name and select customer.');
     }
   };
 
@@ -166,14 +162,13 @@ const SalesManagementPage = () => {
   };
 
   const handleBarcodeError = (error) => {
-    console.error("Barcode scan error:", error);
+    console.error('Barcode scan error:', error);
   };
 
   const handleSell = async () => {
     // Final total price to send to the backend (adding shipping cost but not changing UI)
-    const finalTotalPrice =
-      totalPrice + parseFloat(formData.shippingCost || 0); // ✅ Adding shipping cost
-  
+    const finalTotalPrice = totalPrice + parseFloat(formData.shippingCost || 0); // ✅ Adding shipping cost
+
     // Prepare bill data with commission
     const billData = {
       customerName: formData.customerName,
@@ -186,18 +181,18 @@ const SalesManagementPage = () => {
       products: sales,
       time: new Date(),
     };
-  
+
     setBillData(billData); // ✅ Update bill data
-  
+
     try {
       setLoading(true); // ✅ Show loading state
-  
+
       // Make API call to save the bill
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/sales`,
         billData
       );
-  
+
       if (response.status === 201) {
         // ✅ After successfully generating the bill, delete each product
         for (let sale of sales) {
@@ -209,49 +204,57 @@ const SalesManagementPage = () => {
             );
             console.log(`Deleted product with ID: ${sale.productId}`);
           } catch (deleteError) {
-            console.error(`Error deleting product with ID: ${sale.productId}`, deleteError);
+            console.error(
+              `Error deleting product with ID: ${sale.productId}`,
+              deleteError
+            );
           }
         }
-  
+
         // ✅ Reset form fields
         setFormData((prevData) => ({
           ...prevData,
-          customerName: "",
-          customerId: "",
-          shipmentNumber: "",
-          productName: "",
-          shippingCost: "", // ✅ Reset shipping cost
+          customerName: '',
+          customerId: '',
+          shipmentNumber: '',
+          productName: '',
+          shippingCost: '', // ✅ Reset shipping cost
         }));
-  
-        setCustomTotalPrice(""); // ✅ Reset custom price
+
+        setCustomTotalPrice(''); // ✅ Reset custom price
         setBill(true);
-        toast.success("Item loaded successfully!", { autoClose: 3000, hideProgressBar: true });
+        toast.success('Item loaded successfully!', {
+          autoClose: 3000,
+          hideProgressBar: true,
+        });
         setSales([]);
         setLoading(false);
       } else {
         setLoading(false);
-        alert("Failed to generate bill. Please try again.");
+        alert('Failed to generate bill. Please try again.');
       }
     } catch (error) {
-      toast.error("An error occurred while adding the product.", { autoClose: 3000, hideProgressBar: true });
-      console.error("Error generating bill:", error);
-      alert("Failed to generate bill. Please try again.");
+      toast.error('An error occurred while adding the product.', {
+        autoClose: 3000,
+        hideProgressBar: true,
+      });
+      console.error('Error generating bill:', error);
+      alert('Failed to generate bill. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-  
 
   // Function to handle Generate Bill button click
   const handleGenerateBill = async () => {
     if (!customTotalPrice) {
-      setErrorMessage("Product price is required.");
+      setErrorMessage('Product price is required.');
       return;
     }
 
     if (!formData.shipmentNumber) {
-      setConfirmationMessage("Device has been inserted correctly.");
-      setTimeout(() => setConfirmationMessage(""), 1000);
+      setConfirmationMessage('Device has been inserted correctly.');
+      setTimeout(() => setConfirmationMessage(''), 1000);
       shipmentRef.current?.focus();
     } else {
       handleSell();
@@ -279,7 +282,7 @@ const SalesManagementPage = () => {
 
   return (
     <div className="w-full text-white">
-      <ToastContainer />{" "}
+      <ToastContainer />{' '}
       {confirmationMessage && (
         <p className="text-green-500">{confirmationMessage}</p>
       )}
@@ -357,7 +360,7 @@ const SalesManagementPage = () => {
             type="number"
             value={customTotalPrice}
             onChange={(e) => {
-              setErrorMessage("");
+              setErrorMessage('');
               setCustomTotalPrice(e.target.value);
             }}
             className="w-full lg:w-1/5 p-2 rounded bg-[#26282B] border border-gray-600"
@@ -392,7 +395,7 @@ const SalesManagementPage = () => {
             className="w-full lg:w-1/4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
             onClick={handleAddProduct}
           >
-            Add Product
+            Fetch Product To make sale
           </button>
         </div>
 
@@ -428,7 +431,7 @@ const SalesManagementPage = () => {
                         <td className="py-2 px-4">{sale.brand}</td>
                         <td className="py-2 px-4">{sale.color}</td>
                         <td className="py-2 px-4">{sale.memory}</td>
-                        <td className="py-2 px-4">{sale.imei || "N/A"}</td>
+                        <td className="py-2 px-4">{sale.imei || 'N/A'}</td>
                         <td className="py-2 px-4">
                           €
                           {sale.productPrice
@@ -458,7 +461,7 @@ const SalesManagementPage = () => {
               >
                 {loading && <CircularProgress color="success" size={20} />}
 
-                {bill ? "SOLD" : "SELL"}
+                {bill ? 'SOLD' : 'SELL'}
               </button>
               <button
                 className="w-full lg:w-1/4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"

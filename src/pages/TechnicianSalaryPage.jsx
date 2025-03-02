@@ -1,74 +1,76 @@
-import { useEffect, useState } from "react";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from 'react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchUnpaidDevices,
   fetchPaidDevices,
   fetchGroupedByPayment,
-  generateInvoice,
   payMultipleDevices,
   deleteUnpaidDevice,
   editDevice,
-} from "../redux/slices/paymentSlice";
+  fetchSoldRepairedProducts,
+} from '../redux/slices/paymentSlice';
 
 export default function DeviceHistory() {
   const dispatch = useDispatch();
   const {
+    soldRepairedProducts,
     unpaidDevices,
     paidDevices,
     groupedPayments,
-    invoice,
     status,
     error,
   } = useSelector((state) => state.payments);
 
-  const [activeTab, setActiveTab] = useState("toPay");
+  const [activeTab, setActiveTab] = useState('toPay');
 
   useEffect(() => {
     dispatch(fetchUnpaidDevices());
     dispatch(fetchPaidDevices());
     dispatch(fetchGroupedByPayment());
+    dispatch(fetchSoldRepairedProducts());
   }, [dispatch]);
 
-  if (status === "loading") return <p className="text-center">Loading...</p>;
+  if (status === 'loading') return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-around bg-gray-800 text-white p-2 rounded-lg">
         <button
-          onClick={() => setActiveTab("toPay")}
-          className={`${activeTab === "toPay" ? "bg-blue-400" : ""} p-2`}
+          onClick={() => setActiveTab('toPay')}
+          className={`${activeTab === 'toPay' ? 'bg-blue-400' : ''} p-2`}
         >
           TO PAY
         </button>
         <button
-          onClick={() => setActiveTab("paid")}
-          className={`${activeTab === "paid" ? "bg-blue-400" : ""} p-2`}
+          onClick={() => setActiveTab('paid')}
+          className={`${activeTab === 'paid' ? 'bg-blue-400' : ''} p-2`}
         >
           PAID
         </button>
         <button
-          onClick={() => setActiveTab("fullStory")}
-          className={`${activeTab === "fullStory" ? "bg-blue-400" : ""} p-2`}
+          onClick={() => setActiveTab('fullStory')}
+          className={`${activeTab === 'fullStory' ? 'bg-blue-400' : ''} p-2`}
         >
           FULL STORY
         </button>
       </div>
 
-      {activeTab === "toPay" && (
+      {activeTab === 'toPay' && (
         <TechnicianGroupedTable
           unpaidDevices={unpaidDevices}
+          soldRepairedProducts={soldRepairedProducts}
           dispatch={dispatch}
         />
       )}
 
-      {activeTab === "paid" && (
+      {activeTab === 'paid' && (
         <PaidTechnicianGroupedTable paidDevices={paidDevices} />
       )}
 
-      {activeTab === "fullStory" && (
+      {activeTab === 'fullStory' && (
         <FullStoryTable groupedPayments={groupedPayments} />
       )}
     </div>
@@ -76,11 +78,11 @@ export default function DeviceHistory() {
 }
 
 // 📌 Technician Grouped Table Component
-function TechnicianGroupedTable({ unpaidDevices, dispatch }) {
-  if (!unpaidDevices || unpaidDevices.length === 0) {
-    return <p className="text-center p-4">No unpaid devices available</p>;
-  }
-
+function TechnicianGroupedTable({
+  unpaidDevices,
+  soldRepairedProducts,
+  dispatch,
+}) {
   // Group devices by technician
   const groupedByTechnician = unpaidDevices.reduce((acc, device) => {
     const technician = device.repairInfo.technician.email;
@@ -105,7 +107,7 @@ function TechnicianGroupedTable({ unpaidDevices, dispatch }) {
 
     // Title
     doc.setFontSize(16);
-    doc.text("Customer Invoice", 14, 20);
+    doc.text('Customer Invoice', 14, 20);
 
     // Customer Details
     doc.setFontSize(12);
@@ -136,15 +138,69 @@ function TechnicianGroupedTable({ unpaidDevices, dispatch }) {
       startY: 60,
       head: [
         [
-          "Device Type",
-          "Condition",
-          "Grade",
-          "Model",
-          "Brand",
-          "Color",
-          "Memory",
-          "IMEI",
-          "Technician Cost (€)",
+          'Device Type',
+          'Condition',
+          'Grade',
+          'Model',
+          'Brand',
+          'Color',
+          'Memory',
+          'IMEI',
+          'Technician Cost (€)',
+        ],
+      ],
+      body: tableData,
+    });
+
+    // Save the PDF
+    doc.save(`Invoice_${group.technicianName}.pdf`);
+  };
+
+  const handleSoldProductPDF = (product) => {
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(16);
+    doc.text('Customer Invoice', 14, 20);
+
+    // Customer Details
+    doc.setFontSize(12);
+    doc.text(`Technician Name: ${group.technicianName}`, 14, 30);
+    doc.text(`Technician Email: ${group.technicianEmail}`, 14, 37);
+    doc.text(
+      `Total Amount Due: €${group.devices
+        .reduce((sum, device) => sum + device.repairInfo.totalTechnicianCost, 0)
+        .toFixed(2)}`,
+      14,
+      44
+    );
+
+    // Device Table
+    const tableData = group.devices.map((device) => [
+      device.deviceType,
+      device.condition,
+      device.grade,
+      device.deviceModel,
+      device.deviceBrand,
+      device.deviceColor,
+      device.memory,
+      device.imei,
+      `€${device.repairInfo.totalTechnicianCost}`,
+    ]);
+
+    autoTable(doc, {
+      startY: 60,
+      head: [
+        [
+          'Device Type',
+          'Condition',
+          'Grade',
+          'Model',
+          'Brand',
+          'Color',
+          'Memory',
+          'IMEI',
+          'Technician Cost (€)',
         ],
       ],
       body: tableData,
@@ -156,41 +212,100 @@ function TechnicianGroupedTable({ unpaidDevices, dispatch }) {
 
   return (
     <div className="mt-4">
-      {Object.values(groupedByTechnician).map((group, index) => (
-        <div key={index} className="mb-6 border rounded-lg p-4">
-          <h3 className="text-lg font-bold">
-            Technician: {group.technicianName}
-          </h3>
-          <p>Email: {group.technicianEmail}</p>
-          <DeviceTable devices={group.devices} isSuperAdmin={true} />
-          <div className="flex justify-between items-center mt-4">
-            <p className="text-lg font-semibold">
-              Technician Total Cost: €
-              {group.devices
-                .reduce(
-                  (sum, device) => sum + device.repairInfo.totalTechnicianCost,
-                  0
-                )
-                .toFixed(2)}
-            </p>
+      {Object.keys(groupedByTechnician).length !== 0 ? (
+        Object.values(groupedByTechnician).map((group, index) => (
+          <div key={index} className="mb-6 border rounded-lg p-4">
+            <h3 className="text-lg font-bold">
+              Technician: {group.technicianName}
+            </h3>
+            <p>Email: {group.technicianEmail}</p>
+            <DeviceTable devices={group.devices} isSuperAdmin={true} />
+            <div className="flex justify-between items-center mt-4">
+              <p className="text-lg font-semibold">
+                Technician Total Cost: €
+                {group.devices
+                  .reduce(
+                    (sum, device) =>
+                      sum + device.repairInfo.totalTechnicianCost,
+                    0
+                  )
+                  .toFixed(2)}
+              </p>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => handlePrintPDF(group)}
-                className="p-2 bg-blue-500 text-white rounded-lg"
-              >
-                Generate Invoice
-              </button>
-              <button
-                onClick={() => handlePayment(group.devices)}
-                className="p-2 bg-green-500 text-white rounded-lg"
-              >
-                Pay
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handlePrintPDF(group)}
+                  className="p-2 bg-blue-500 text-white rounded-lg"
+                >
+                  Generate Invoice
+                </button>
+                <button
+                  onClick={() => handlePayment(group.devices)}
+                  className="p-2 bg-green-500 text-white rounded-lg"
+                >
+                  Pay
+                </button>
+              </div>
             </div>
           </div>
+        ))
+      ) : (
+        <>
+          <p className="text-white text-center p-4">
+            No unpaid devices available
+          </p>
+        </>
+      )}
+
+      {soldRepairedProducts && soldRepairedProducts.length > 0 && (
+        <div className="mb-6 border rounded-lg p-4">
+          <h2 className="text-lg mb-5 text-white">Sold Repaired Products</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 p-2">Model</th>
+                <th className="border border-gray-300 p-2">IMEI</th>
+                <th className="border border-gray-300 p-2">
+                  Replaced Components
+                </th>
+                <th className="border border-gray-300 p-2">Status</th>
+                <th className="border border-gray-300 p-2">Technician Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {soldRepairedProducts.map((product, index) => {
+                const combinedComponents = Object.keys(
+                  product.repairInfo.repairComponents
+                )
+                  .map((component) => component)
+                  .join(', ');
+                return (
+                  <tr key={index} className="border text-white border-gray-300">
+                    <th className="border border-gray-300 p-2">
+                      {product.model}
+                    </th>
+                    <td className="border border-gray-300 p-2">
+                      {product.imei}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {combinedComponents}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {product.status}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {' '}
+                      € {product.repairInfo.totalTechnicianCost.toFixed(2)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -246,9 +361,9 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
   const [showModal, setShowModal] = useState(false);
   const [currentDevice, setCurrentDevice] = useState(null); // To hold the device being edited
   const [formData, setFormData] = useState({
-    deviceModel: "",
-    imei: "",
-    status: "",
+    deviceModel: '',
+    imei: '',
+    status: '',
     technicianCost: 0,
   });
 
@@ -289,9 +404,9 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
 
     setShowModal(false); // Close the modal after editing
     setFormData({
-      deviceModel: "",
-      imei: "",
-      status: "",
+      deviceModel: '',
+      imei: '',
+      status: '',
       technicianCost: 0,
     }); // Reset form data
   };
@@ -319,12 +434,12 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
               </td>
               <td className="border border-gray-300 p-2">{device.imei}</td>
               <td className="border border-gray-300 p-2">
-                {Object.keys(device.repairInfo.repairComponents).join(", ")}
+                {Object.keys(device.repairInfo.repairComponents).join(', ')}
               </td>
               <td className="border border-gray-300 p-2">{device.status}</td>
               <td className="border border-gray-300 p-2 flex justify-between">
                 {/* €{device.repairInfo.totalTechnicianCost.toFixed(2)} */}
-                {device.paymentStatus === "Paid"
+                {device.paymentStatus === 'Paid'
                   ? device.paymentStatus
                   : `€ ${device.repairInfo.totalTechnicianCost.toFixed(2)}`}
               </td>
@@ -444,7 +559,7 @@ function FullStoryTable({ groupedPayments }) {
 
     // Title
     doc.setFontSize(16);
-    doc.text("Customer Invoice", 14, 20);
+    doc.text('Customer Invoice', 14, 20);
 
     // Customer Details
     doc.setFontSize(12);
@@ -474,15 +589,15 @@ function FullStoryTable({ groupedPayments }) {
       startY: 60,
       head: [
         [
-          "Device Type",
-          "Condition",
-          "Grade",
-          "Model",
-          "Brand",
-          "Color",
-          "Memory",
-          "IMEI",
-          "Price (€)",
+          'Device Type',
+          'Condition',
+          'Grade',
+          'Model',
+          'Brand',
+          'Color',
+          'Memory',
+          'IMEI',
+          'Price (€)',
         ],
       ],
       body: tableData,
@@ -520,7 +635,7 @@ function FullStoryTable({ groupedPayments }) {
                     ).toLocaleDateString()} - ${new Date(
                       group.devices[group.devices.length - 1].paymentDate
                     ).toLocaleDateString()}`
-                  : "N/A"}
+                  : 'N/A'}
               </td>
               <td className="border border-gray-300 p-2">
                 {new Date(group._id.paymentDate).toLocaleDateString()}
@@ -568,9 +683,9 @@ const printInvoice = (group) => {
     Technician: ${group.technicianName} (${group._id.technicianEmail})
     Payment Date: ${new Date(group._id.paymentDate).toLocaleDateString()}
     Total Paid: €${group.totalAmount}
-    Devices: ${group.devices.map((d) => d.deviceModel).join(", ")}
+    Devices: ${group.devices.map((d) => d.deviceModel).join(', ')}
   `;
 
-  console.log("Printing Invoice:", invoiceData);
-  alert("Invoice sent to printer!"); // Replace with actual print logic
+  console.log('Printing Invoice:', invoiceData);
+  alert('Invoice sent to printer!'); // Replace with actual print logic
 };
