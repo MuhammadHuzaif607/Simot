@@ -214,8 +214,8 @@ function TechnicianGroupedTable({
     <div className="mt-4">
       {Object.keys(groupedByTechnician).length !== 0 ? (
         Object.values(groupedByTechnician).map((group, index) => (
-          <div key={index} className="mb-6 border rounded-lg p-4">
-            <h3 className="text-lg font-bold">
+          <div key={index} className="mb-6 border rounded-lg p-4 text-white">
+            <h3 className="text-lg font-bold ">
               Technician: {group.technicianName}
             </h3>
             <p>Email: {group.technicianEmail}</p>
@@ -333,7 +333,7 @@ function PaidTechnicianGroupedTable({ paidDevices }) {
   return (
     <div className="mt-4">
       {Object.values(groupedByTechnician).map((group, index) => (
-        <div key={index} className="mb-6 border rounded-lg p-4">
+        <div key={index} className="mb-6 border rounded-lg p-4 text-white">
           <h3 className="text-lg font-bold">
             Technician: {group.technicianName}
           </h3>
@@ -413,7 +413,7 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
 
   return (
     <div className="overflow-x-auto mt-4">
-      <table className="w-full border-collapse border border-gray-300">
+      <table className="w-full border-collapse border border-gray-300 text-black">
         <thead>
           <tr className="bg-gray-200">
             <th className="border border-gray-300 p-2">Model</th>
@@ -613,8 +613,8 @@ function FullStoryTable({ groupedPayments }) {
 
   return (
     <div className="mt-4">
-      <h3 className="text-center text-lg font-bold">Last 90 Days Timeline</h3>
-      <table className="w-full border-collapse border border-gray-300 mt-4">
+      <h3 className="text-center text-lg font-bold text-white">Last 90 Days Timeline</h3>
+      <table className="w-full border-collapse border border-gray-300 mt-4 ">
         <thead>
           <tr className="bg-gray-200">
             <th className="border border-gray-300 p-2">GROUP</th>
@@ -624,7 +624,7 @@ function FullStoryTable({ groupedPayments }) {
             <th className="border border-gray-300 p-2">INVOICE</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className='text-white'>
           {groupedPayments.map((group, index) => (
             <tr key={index} className="border border-gray-300">
               <td className="border border-gray-300 p-2">GROUP {index + 1}</td>
@@ -654,7 +654,7 @@ function FullStoryTable({ groupedPayments }) {
             </tr>
           ))}
         </tbody>
-        <tfoot>
+        <tfoot className='text-white'>
           <tr>
             <td
               colSpan="3"
