@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Loading from "./Loading";
 
 const EditUserModal = ({ isOpen, onClose, onSave, editData, setEditData }) => {

@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
-import EditUserModal from "./EditUserModal";
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import EditUserModal from './EditUserModal';
 
 const UserData = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingDeleteId, setLoadingDeleteId] = useState(null); // Track which user is being deleted
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false); // Track saving state for edit
   const [editData, setEditData] = useState({
-    _id: "",
-    userName: "",
-    email: "",
-    role: "",
+    _id: '',
+    userName: '',
+    email: '',
+    role: '',
   });
-  const [filterText, setFilterText] = useState(""); // State for filtering
+  const [filterText, setFilterText] = useState(''); // State for filtering
 
   // Retrieve the current user ID from localStorage
-  const currentUser = JSON.parse(localStorage.getItem("user"));
+  const currentUser = JSON.parse(localStorage.getItem('user'));
   const currentUserId = currentUser.user.id; // Extract current user ID
 
   // Fetch all users from the API
@@ -30,7 +31,7 @@ const UserData = () => {
         setUsers(response.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error('Error fetching users:', error);
         setLoading(false);
       }
     };
@@ -38,6 +39,7 @@ const UserData = () => {
     fetchUsers();
   }, []);
 
+  // Handle user deletion
   const handleDelete = async (userId) => {
     setLoadingDeleteId(userId); // Set loading for the delete action
     try {
@@ -47,11 +49,12 @@ const UserData = () => {
       setUsers(users.filter((user) => user._id !== userId));
       setLoadingDeleteId(null); // Reset the loading state once deletion is complete
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error('Error deleting user:', error);
       setLoadingDeleteId(null); // Reset the loading state on error
     }
   };
 
+  // Handle edit button click
   const handleEditClick = (user) => {
     setEditData({
       _id: user._id,
@@ -62,12 +65,15 @@ const UserData = () => {
     setIsModalOpen(true);
   };
 
+  // Handle modal close
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setEditData({ _id: "", userName: "", email: "", role: "" });
+    setEditData({ _id: '', userName: '', email: '', role: '' });
   };
 
+  // Handle saving changes after editing a user
   const handleSaveChanges = async () => {
+    setIsSaving(true); // Set saving state to true
     try {
       await axios.put(
         `${import.meta.env.VITE_API_URL}/api/auth/edituser/${editData._id}`,
@@ -78,14 +84,25 @@ const UserData = () => {
         }
       ); // Update user API
 
-      setUsers(
-        users.map((user) =>
-          user._id === editData._id ? { ...user, ...editData } : user
+      // Update the local state with the edited user data
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === editData._id
+            ? {
+                ...user,
+                name: editData.userName,
+                email: editData.email,
+                role: editData.role,
+              }
+            : user
         )
       );
-      setIsModalOpen(false);
+
+      setIsModalOpen(false); // Close the modal
     } catch (error) {
-      console.error("Error saving changes:", error);
+      console.error('Error saving changes:', error);
+    } finally {
+      setIsSaving(false); // Reset saving state
     }
   };
 
@@ -144,16 +161,16 @@ const UserData = () => {
                     <button
                       className={`w-20 py-1 px-2 rounded text-white ${
                         currentUserId === user._id
-                          ? "bg-blue-400 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700"
+                          ? 'bg-blue-400 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700'
                       }`}
                       onClick={() => handleEditClick(user)}
                       disabled={currentUserId === user._id} // Disable for current user
                       style={{
                         cursor:
                           currentUserId === user._id
-                            ? "not-allowed"
-                            : "pointer",
+                            ? 'not-allowed'
+                            : 'pointer',
                       }} // Add cursor style
                     >
                       Edit
@@ -164,8 +181,8 @@ const UserData = () => {
                       className={`w-20 py-1 px-2 rounded text-white ${
                         loadingDeleteId === user._id ||
                         currentUserId === user._id
-                          ? "bg-red-400 cursor-not-allowed"
-                          : "bg-red-600 hover:bg-red-700"
+                          ? 'bg-red-400 cursor-not-allowed'
+                          : 'bg-red-600 hover:bg-red-700'
                       }`}
                       disabled={
                         loadingDeleteId === user._id ||
@@ -175,8 +192,8 @@ const UserData = () => {
                         cursor:
                           loadingDeleteId === user._id ||
                           currentUserId === user._id
-                            ? "not-allowed"
-                            : "pointer",
+                            ? 'not-allowed'
+                            : 'pointer',
                       }} // Add cursor style
                     >
                       {loadingDeleteId === user._id ? (
@@ -185,7 +202,7 @@ const UserData = () => {
                           Del....
                         </div>
                       ) : (
-                        "Delete"
+                        'Delete'
                       )}
                     </button>
                   </td>
@@ -202,12 +219,14 @@ const UserData = () => {
         </table>
       </div>
 
+      {/* Edit User Modal */}
       <EditUserModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onSave={handleSaveChanges}
         editData={editData}
         setEditData={setEditData}
+        isSaving={isSaving} // Pass the saving state to the modal
       />
     </div>
   );
