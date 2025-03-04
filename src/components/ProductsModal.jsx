@@ -1,4 +1,9 @@
+
+import { useSelector } from 'react-redux';
+
 const ProductsModal = ({ products, totalPrice, onClose }) => {
+  const commissionRate = useSelector((state) => state.commission.value);
+
   const calculateNetProfit = (product) => {
     const actualPrice = products?.products[0].productPrice || 0;
     const soldPrice = products.customTotalPrice;
@@ -13,7 +18,8 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
         product.repairInfo.technicainCostByEachComp || {}
       ).reduce((sum, val) => sum + parseFloat(val || 0), 0);
 
-      let commission = soldPrice * (15 / 100);
+      // Fetch commission from store
+      let commission = soldPrice * (commissionRate / 100);
       commission = soldPrice - commission;
       const afterShippingCost = commission - products.shippingCost;
       const netProfit = afterShippingCost - actualPrice;
@@ -30,7 +36,7 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
     } else {
       // If no repair info, only consider arrival cost and shipping
       const totalCost = soldPrice + products.shippingCost;
-      let commission = soldPrice * (15 / 100);
+      let commission = soldPrice * (commissionRate / 100);
       commission = soldPrice - commission;
       const afterShippingCost = commission - products.shippingCost;
       const netProfit = afterShippingCost - actualPrice;

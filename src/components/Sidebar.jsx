@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import img from "../assets/unnamed-removebg-preview.png";
-import { IoClose } from "react-icons/io5";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import img from '../assets/unnamed-removebg-preview.png';
+import { IoClose } from 'react-icons/io5';
 
 function Sidebar({ isSidebarOpen, toggleSidebar }) {
   const navigate = useNavigate();
-  const [activeLink, setActiveLink] = useState("");
-  const [userRole, setUserRole] = useState("");
+  const [activeLink, setActiveLink] = useState('');
+  const [userRole, setUserRole] = useState('');
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
+    localStorage.removeItem('user');
+    navigate('/');
   };
 
   const handleLinkClick = (link) => {
@@ -19,9 +19,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
+    const user = localStorage.getItem('user');
     if (!user) {
-      navigate("/");
+      navigate('/');
     } else {
       const parsedUser = JSON.parse(user);
       setUserRole(parsedUser.user.role);
@@ -31,7 +31,7 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
   return (
     <div
       className={`min-h-screen w-full 2xl:w-[400px] xl:w-[300px] lg:w-[250px] md:w-[200px] flex flex-col justify-between px-4 dark-gray text-white ${
-        isSidebarOpen ? "block" : "hidden"
+        isSidebarOpen ? 'block' : 'hidden'
       } md:block`}
     >
       <div>
@@ -47,14 +47,14 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
         </div>
 
         <ul className="flex flex-col">
-          {userRole === "technical" ? (
+          {userRole === 'technical' ? (
             // If user is "technical", show ONLY the "Technical" menu item
             <li>
               <Link
                 to="/technical"
-                onClick={() => handleLinkClick("technical")}
+                onClick={() => handleLinkClick('technical')}
                 className={`sidebar-link ${
-                  activeLink === "technical" ? "button-color" : ""
+                  activeLink === 'technical' ? 'button-color' : ''
                 }`}
               >
                 Technical
@@ -63,13 +63,13 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
           ) : (
             // Show other menu items for other roles
             <>
-              {userRole === "superadmin" && (
+              {userRole === 'superadmin' && (
                 <li>
                   <Link
                     to="/dashboard"
-                    onClick={() => handleLinkClick("dashboard")}
+                    onClick={() => handleLinkClick('dashboard')}
                     className={`sidebar-link ${
-                      activeLink === "dashboard" ? "button-color" : ""
+                      activeLink === 'dashboard' ? 'button-color' : ''
                     }`}
                   >
                     Dashboard
@@ -78,21 +78,21 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               )}
               <li>
                 <button
-                  onClick={() => handleLinkClick("system-management")}
+                  onClick={() => handleLinkClick('system-management')}
                   className={`sidebar-link w-full text-left ${
-                    activeLink === "system-management" ? "button-color" : ""
+                    activeLink === 'system-management' ? 'button-color' : ''
                   }`}
                 >
                   System Management
                 </button>
-                {activeLink === "system-management" && (
+                {activeLink === 'system-management' && (
                   <ul className="pl-4 ml-2 border-l-2">
                     <li>
                       <Link
                         to="/addstock"
-                        onClick={() => handleLinkClick("addstock")}
+                        onClick={() => handleLinkClick('addstock')}
                         className={`sidebar-link ${
-                          activeLink === "addstock" ? "button-color" : ""
+                          activeLink === 'addstock' ? 'button-color' : ''
                         }`}
                       >
                         Add Stock
@@ -101,11 +101,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                     <li>
                       <Link
                         to="/add-high-stock"
-                        onClick={() => handleLinkClick("add-high-stock")}
+                        onClick={() => handleLinkClick('add-high-stock')}
                         className={`sidebar-link ${
-                          activeLink === "add-high-stock"
-                            ? "button-color"
-                            : ""
+                          activeLink === 'add-high-stock' ? 'button-color' : ''
                         }`}
                       >
                         Add High Stock
@@ -114,21 +112,21 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                     <li>
                       <Link
                         to="/adddevices"
-                        onClick={() => handleLinkClick("adddevices")}
+                        onClick={() => handleLinkClick('adddevices')}
                         className={`sidebar-link ${
-                          activeLink === "adddevices" ? "button-color" : ""
+                          activeLink === 'adddevices' ? 'button-color' : ''
                         }`}
                       >
                         Add Devices
                       </Link>
                     </li>
-                    {userRole === "superadmin" && (
+                    {userRole === 'superadmin' && (
                       <li>
                         <Link
                           to="/add-user"
-                          onClick={() => handleLinkClick("add-employee")}
+                          onClick={() => handleLinkClick('add-employee')}
                           className={`sidebar-link ${
-                            activeLink === "add-employee" ? "button-color" : ""
+                            activeLink === 'add-employee' ? 'button-color' : ''
                           }`}
                         >
                           Add Employee
@@ -138,9 +136,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                     <li>
                       <Link
                         to="/addcustomer"
-                        onClick={() => handleLinkClick("addcustomer")}
+                        onClick={() => handleLinkClick('addcustomer')}
                         className={`sidebar-link ${
-                          activeLink === "addcustomer" ? "button-color" : ""
+                          activeLink === 'addcustomer' ? 'button-color' : ''
                         }`}
                       >
                         Add Customers
@@ -149,13 +147,13 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                   </ul>
                 )}
               </li>
-              {userRole === "superadmin" && (
+              {userRole === 'superadmin' && (
                 <li>
                   <Link
                     to="/user"
-                    onClick={() => handleLinkClick("user")}
+                    onClick={() => handleLinkClick('user')}
                     className={`sidebar-link ${
-                      activeLink === "user" ? "button-color" : ""
+                      activeLink === 'user' ? 'button-color' : ''
                     }`}
                   >
                     Employees
@@ -165,21 +163,21 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/stockpage"
-                  onClick={() => handleLinkClick("Stocks")}
+                  onClick={() => handleLinkClick('Stocks')}
                   className={`sidebar-link ${
-                    activeLink === "Stocks" ? "button-color" : ""
+                    activeLink === 'Stocks' ? 'button-color' : ''
                   }`}
                 >
                   Stocks
                 </Link>
               </li>
-              {userRole === "superadmin" && (
+              {userRole === 'superadmin' && (
                 <li>
                   <Link
                     to="/customerdata"
-                    onClick={() => handleLinkClick("customerdata")}
+                    onClick={() => handleLinkClick('customerdata')}
                     className={`sidebar-link ${
-                      activeLink === "customerdata" ? "button-color" : ""
+                      activeLink === 'customerdata' ? 'button-color' : ''
                     }`}
                   >
                     Customers
@@ -189,9 +187,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/salesdata"
-                  onClick={() => handleLinkClick("salesdata")}
+                  onClick={() => handleLinkClick('salesdata')}
                   className={`sidebar-link ${
-                    activeLink === "salesdata" ? "button-color" : ""
+                    activeLink === 'salesdata' ? 'button-color' : ''
                   }`}
                 >
                   Sales Management
@@ -200,9 +198,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/devicesdata"
-                  onClick={() => handleLinkClick("devicesdata")}
+                  onClick={() => handleLinkClick('devicesdata')}
                   className={`sidebar-link ${
-                    activeLink === "devicesdata" ? "button-color" : ""
+                    activeLink === 'devicesdata' ? 'button-color' : ''
                   }`}
                 >
                   Devices
@@ -211,9 +209,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/salesstatus"
-                  onClick={() => handleLinkClick("salesstatus")}
+                  onClick={() => handleLinkClick('salesstatus')}
                   className={`sidebar-link ${
-                    activeLink === "salesstatus" ? "button-color" : ""
+                    activeLink === 'salesstatus' ? 'button-color' : ''
                   }`}
                 >
                   Sales Status
@@ -222,9 +220,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/testdevices"
-                  onClick={() => handleLinkClick("testdevices")}
+                  onClick={() => handleLinkClick('testdevices')}
                   className={`sidebar-link ${
-                    activeLink === "testdevices" ? "button-color" : ""
+                    activeLink === 'testdevices' ? 'button-color' : ''
                   }`}
                 >
                   Devices to Test
@@ -233,9 +231,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/saleshistory"
-                  onClick={() => handleLinkClick("saleshistory")}
+                  onClick={() => handleLinkClick('saleshistory')}
                   className={`sidebar-link ${
-                    activeLink === "saleshistory" ? "button-color" : ""
+                    activeLink === 'saleshistory' ? 'button-color' : ''
                   }`}
                 >
                   Sales History
@@ -244,9 +242,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/return"
-                  onClick={() => handleLinkClick("return")}
+                  onClick={() => handleLinkClick('return')}
                   className={`sidebar-link ${
-                    activeLink === "return" ? "button-color" : ""
+                    activeLink === 'return' ? 'button-color' : ''
                   }`}
                 >
                   Return
@@ -255,9 +253,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/repair"
-                  onClick={() => handleLinkClick("repair")}
+                  onClick={() => handleLinkClick('repair')}
                   className={`sidebar-link ${
-                    activeLink === "repair" ? "button-color" : ""
+                    activeLink === 'repair' ? 'button-color' : ''
                   }`}
                 >
                   Repair
@@ -266,9 +264,9 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/invoice"
-                  onClick={() => handleLinkClick("invoice")}
+                  onClick={() => handleLinkClick('invoice')}
                   className={`sidebar-link ${
-                    activeLink === "invoice" ? "button-color" : ""
+                    activeLink === 'invoice' ? 'button-color' : ''
                   }`}
                 >
                   Invoice
@@ -277,36 +275,39 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               <li>
                 <Link
                   to="/technician-salary"
-                  onClick={() => handleLinkClick("technician-salary")}
+                  onClick={() => handleLinkClick('technician-salary')}
                   className={`sidebar-link ${
-                    activeLink === "technician-salary" ? "button-color" : ""
+                    activeLink === 'technician-salary' ? 'button-color' : ''
                   }`}
                 >
                   Technician Salary
                 </Link>
               </li>
-             {userRole === "superadmin" && ( <li>
-                <Link
-                  to="/material-cost"
-                  onClick={() => handleLinkClick("material-cost")}
-                  className={`sidebar-link ${
-                    activeLink === "material-cost" ? "button-color" : ""
-                  }`}
-                >
-                  Cost Table (Material)
-                </Link>
-              </li>)}
-              {userRole === "superadmin" && (<li>
-                <Link
-                  to="/technician-cost"
-                  onClick={() => handleLinkClick("technician-cost")}
-                  className={`sidebar-link ${
-                    activeLink === "technician-cost" ? "button-color" : ""
-                  }`}
-                >
-                  Cost Table (Techinican)
-                </Link>
-                {/* {userRole === "superadmin" && (
+              {userRole === 'superadmin' && (
+                <li>
+                  <Link
+                    to="/material-cost"
+                    onClick={() => handleLinkClick('material-cost')}
+                    className={`sidebar-link ${
+                      activeLink === 'material-cost' ? 'button-color' : ''
+                    }`}
+                  >
+                    Cost Table (Material)
+                  </Link>
+                </li>
+              )}
+              {userRole === 'superadmin' && (
+                <li>
+                  <Link
+                    to="/technician-cost"
+                    onClick={() => handleLinkClick('technician-cost')}
+                    className={`sidebar-link ${
+                      activeLink === 'technician-cost' ? 'button-color' : ''
+                    }`}
+                  >
+                    Cost Table (Techinican)
+                  </Link>
+                  {/* {userRole === "superadmin" && (
                 <li>
                   <Link
                     to="/deletedata"
@@ -319,7 +320,21 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                   </Link>
                 </li>
               )} */}
-              </li>)}
+                </li>
+              )}
+              {userRole === 'superadmin' && (
+                <li>
+                  <Link
+                    to="/update-commission"
+                    onClick={() => handleLinkClick('update-commission')}
+                    className={`sidebar-link ${
+                      activeLink === 'update-commission' ? 'button-color' : ''
+                    }`}
+                  >
+                    Update Commission
+                  </Link>
+                </li>
+              )}
             </>
           )}
         </ul>

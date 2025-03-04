@@ -1,29 +1,30 @@
-import Layout from "./Layout.jsx";
-import "./App.css";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import Dashboard from "./components/Dashboard.jsx";
-import AddStock from "./components/AddStock.jsx";
-import UserData from "./components/UserData.jsx";
-import AddUser from "./components/AddUser.jsx";
-import Login from "./components/Login.jsx";
-import CustomerData from "./components/CustomerData.jsx";
-import AddCustomer from "./components/AddCustomer.jsx";
-import SalesManagementPage from "./components/SalesManagementPage.jsx";
-import SalesStatusData from "./components/SalesStatusData.jsx";
-import SalesHistory from "./components/SalesHistory.jsx";
-import DevicesData from "./components/DevicesData.jsx";
-import AddDevices from "./components/AddDevices.jsx";
-import StockPage from "./components/StockPage.jsx";
-import Invoice from "./components/Invoice.jsx";
-import Return from "./components/Return.jsx";
-import Repair from "./components/Repair.jsx";
-import AddHighStock from "./components/AddHighStock.jsx";
-import TechnicalPage from "./pages/TechnicalPage.jsx";
-import TestDevicesPage from "./pages/TestDevicesPage.jsx";
-import TechnicalCostPage from "./pages/TechnicalCost.jsx";
-import MaterialCostPage from "./pages/MaterialCostPage.jsx";
-import TechnicianSalaryPage from "./pages/TechnicianSalaryPage.jsx";
-import DeleteDevicePage from "./pages/deleteDevicePage.jsx";
+import Layout from './Layout.jsx';
+import './App.css';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import Dashboard from './components/Dashboard.jsx';
+import AddStock from './components/AddStock.jsx';
+import UserData from './components/UserData.jsx';
+import AddUser from './components/AddUser.jsx';
+import Login from './components/Login.jsx';
+import CustomerData from './components/CustomerData.jsx';
+import AddCustomer from './components/AddCustomer.jsx';
+import SalesManagementPage from './components/SalesManagementPage.jsx';
+import SalesStatusData from './components/SalesStatusData.jsx';
+import SalesHistory from './components/SalesHistory.jsx';
+import DevicesData from './components/DevicesData.jsx';
+import AddDevices from './components/AddDevices.jsx';
+import StockPage from './components/StockPage.jsx';
+import Invoice from './components/Invoice.jsx';
+import Return from './components/Return.jsx';
+import Repair from './components/Repair.jsx';
+import AddHighStock from './components/AddHighStock.jsx';
+import TechnicalPage from './pages/TechnicalPage.jsx';
+import TestDevicesPage from './pages/TestDevicesPage.jsx';
+import TechnicalCostPage from './pages/TechnicalCost.jsx';
+import MaterialCostPage from './pages/MaterialCostPage.jsx';
+import TechnicianSalaryPage from './pages/TechnicianSalaryPage.jsx';
+import DeleteDevicePage from './pages/deleteDevicePage.jsx';
+import UpdateCommissionPage from './pages/updateCommissionPage.jsx';
 
 function App() {
   return (
@@ -212,6 +213,14 @@ function App() {
             element={
               <Layout>
                 <DeleteDevicePage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/update-commission"
+            element={
+              <Layout>
+                <UpdateCommissionPage />
               </Layout>
             }
           />
