@@ -115,6 +115,8 @@ const SalesManagementPage = () => {
           repairInfo: product.repairInfo,
           paymentStatus: product.paymentStatus,
           status: product.status,
+          isRepaired: product.isRepaired,
+          soldRepaired: product.soldRepaired,
           // parseFloat(product.price) * (parseFloat(formData.commission) / 100),
         };
 
@@ -197,12 +199,22 @@ const SalesManagementPage = () => {
         // ✅ After successfully generating the bill, delete each product
         for (let sale of sales) {
           try {
-            await axios.delete(
-              `${import.meta.env.VITE_API_URL}/api/products/deleteproducts/${
-                sale.productId
-              }`
-            );
-            console.log(`Deleted product with ID: ${sale.productId}`);
+            if (!sale.isRepaired) {
+              await axios.delete(
+                `${import.meta.env.VITE_API_URL}/api/products/deleteproducts/${
+                  sale.productId
+                }`
+              );
+              console.log(`Deleted product with ID: ${sale.productId}`);
+            } else {
+              const response = await axios.patch(
+                `${
+                  import.meta.env.VITE_API_URL
+                }/api/products/update-sold-flag/${sale.productId}`
+              );
+              console.log('Product Updated');
+              console.log('Response', response);
+            }
           } catch (deleteError) {
             console.error(
               `Error deleting product with ID: ${sale.productId}`,

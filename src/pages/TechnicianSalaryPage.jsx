@@ -15,10 +15,10 @@ import {
 export default function DeviceHistory() {
   const dispatch = useDispatch();
   const {
-    soldRepairedProducts,
     unpaidDevices,
     paidDevices,
     groupedPayments,
+    soldRepairedProducts,
     status,
     error,
   } = useSelector((state) => state.payments);
@@ -80,8 +80,8 @@ export default function DeviceHistory() {
 // 📌 Technician Grouped Table Component
 function TechnicianGroupedTable({
   unpaidDevices,
-  soldRepairedProducts,
   dispatch,
+  soldRepairedProducts,
 }) {
   // Group devices by technician
   const groupedByTechnician = unpaidDevices.reduce((acc, device) => {
@@ -257,7 +257,7 @@ function TechnicianGroupedTable({
         </>
       )}
 
-      {soldRepairedProducts && soldRepairedProducts.length > 0 && (
+      {/* {soldRepairedProducts && soldRepairedProducts.length > 0 && (
         <div className="mb-6 border rounded-lg p-4">
           <h2 className="text-lg mb-5 text-white">Sold Repaired Products</h2>
           <table className="w-full border-collapse border border-gray-300">
@@ -305,7 +305,7 @@ function TechnicianGroupedTable({
 
           
         </div>
-      )}
+      )} */}
     </div>
   );
 }
@@ -475,7 +475,7 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
                   <label className="block text-gray-700">Device Model</label>
                   <input
                     type="text"
-                    className="border rounded w-full py-2 px-3"
+                    className="border rounded w-full py-2 px-3 text-black"
                     value={formData.deviceModel}
                     onChange={(e) =>
                       setFormData({ ...formData, deviceModel: e.target.value })
@@ -487,7 +487,7 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
                   <label className="block text-gray-700">IMEI</label>
                   <input
                     type="text"
-                    className="border rounded w-full py-2 px-3"
+                    className="border rounded w-full py-2 px-3 text-black"
                     value={formData.imei}
                     onChange={(e) =>
                       setFormData({ ...formData, imei: e.target.value })
@@ -498,7 +498,7 @@ function DeviceTable({ devices, isSuperAdmin = false }) {
                 <div className="mb-4">
                   <label className="block text-gray-700">Status</label>
                   <select
-                    className="border rounded w-full py-2 px-3"
+                    className="border rounded w-full py-2 px-3 text-black"
                     value={formData.status}
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
@@ -613,7 +613,9 @@ function FullStoryTable({ groupedPayments }) {
 
   return (
     <div className="mt-4">
-      <h3 className="text-center text-lg font-bold text-white">Last 90 Days Timeline</h3>
+      <h3 className="text-center text-lg font-bold text-white">
+        Last 90 Days Timeline
+      </h3>
       <table className="w-full border-collapse border border-gray-300 mt-4 ">
         <thead>
           <tr className="bg-gray-200">
@@ -624,7 +626,7 @@ function FullStoryTable({ groupedPayments }) {
             <th className="border border-gray-300 p-2">INVOICE</th>
           </tr>
         </thead>
-        <tbody className='text-white'>
+        <tbody className="text-white">
           {groupedPayments.map((group, index) => (
             <tr key={index} className="border border-gray-300">
               <td className="border border-gray-300 p-2">GROUP {index + 1}</td>
@@ -654,7 +656,7 @@ function FullStoryTable({ groupedPayments }) {
             </tr>
           ))}
         </tbody>
-        <tfoot className='text-white'>
+        <tfoot className="text-white">
           <tr>
             <td
               colSpan="3"

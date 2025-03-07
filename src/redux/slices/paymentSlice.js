@@ -178,9 +178,11 @@ export const fetchSoldRepairedProducts = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sales/getsalesofrepairedproducts`
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/products/getallproductswithsoldrepairflag`
       );
-      return response.data.products;
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
