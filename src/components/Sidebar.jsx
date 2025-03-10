@@ -322,7 +322,7 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
               )} */}
                 </li>
               )}
-              {userRole === 'superadmin' && (
+              {/* {userRole === 'superadmin' && (
                 <li>
                   <Link
                     to="/update-commission"
@@ -334,7 +334,7 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                     Update Commission
                   </Link>
                 </li>
-              )}
+              )} */}
             </>
           )}
         </ul>
