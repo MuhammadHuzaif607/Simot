@@ -1,14 +1,12 @@
-
-import { useSelector } from 'react-redux';
-
-const ProductsModal = ({ products, totalPrice, onClose }) => {
-  const commissionRate = useSelector((state) => state.commission.value);
-
+const ProductsModal = ({ products, totalPrice, onClose, commission }) => {
   const calculateNetProfit = (product) => {
-    const actualPrice = products?.products[0].productPrice || 0;
-    const soldPrice = products.customTotalPrice;
+    const actualPrice = product?.productPrice || 0;
+    const soldPrice = products.customTotalPrice || 0;
 
-    // Only include repair costs if repairInfo exists
+    let commissionAmount = soldPrice * (commission / 100);
+    const afterCommission = soldPrice - commissionAmount;
+    const afterShippingCost = afterCommission - products.shippingCost;
+
     if (product?.repairInfo) {
       const costOfComponents = Object.values(
         product.repairInfo.repairComponents || {}
@@ -18,14 +16,9 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
         product.repairInfo.technicainCostByEachComp || {}
       ).reduce((sum, val) => sum + parseFloat(val || 0), 0);
 
-      // Fetch commission from store
-      let commission = soldPrice * (commissionRate / 100);
-      commission = soldPrice - commission;
-      const afterShippingCost = commission - products.shippingCost;
-      const netProfit = afterShippingCost - actualPrice;
-
       const totalCost =
         actualPrice + costOfComponents + technicianCost + products.shippingCost;
+      const netProfit = afterShippingCost - actualPrice;
 
       return {
         totalCost,
@@ -34,11 +27,8 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
         technicianCost,
       };
     } else {
-      // If no repair info, only consider arrival cost and shipping
-      const totalCost = soldPrice + products.shippingCost;
-      let commission = soldPrice * (commissionRate / 100);
-      commission = soldPrice - commission;
-      const afterShippingCost = commission - products.shippingCost;
+      // No repair info, only consider arrival cost and shipping
+      const totalCost = actualPrice + products.shippingCost;
       const netProfit = afterShippingCost - actualPrice;
 
       return {
@@ -50,19 +40,22 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
     }
   };
 
-  const deviceType = products.products[0].deviceType;
-  const condition = products.products[0].condition;
-  const brand = products.products[0].brand;
-  const model = products.products[0].model;
-  const grade = products.products[0].grade;
-  const color = products.products[0].color;
-  const memory = products.products[0].memory;
-  const imei = products.products[0].imei;
-  const info = products.products[0].info;
-  const originalPrice = products.products[0].productPrice;
-  const soldPrice = products.customTotalPrice;
+  const productDetails = products?.products[0] || {};
+  const {
+    deviceType,
+    condition,
+    brand,
+    model,
+    grade,
+    color,
+    memory,
+    imei,
+    info,
+    productPrice: originalPrice,
+  } = productDetails;
+
   const { totalCost, netProfit, costOfComponents, technicianCost } =
-    calculateNetProfit(products);
+    calculateNetProfit(productDetails);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-75">
@@ -97,34 +90,35 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
                 <td className="py-2 px-4 border">{imei}</td>
                 <td className="py-2 px-4 border">{info}</td>
                 <td className="py-2 px-4 border">€{originalPrice}</td>
-                <td className="py-2 px-4 border">€{soldPrice}</td>
+                <td className="py-2 px-4 border">
+                  €{products.customTotalPrice}
+                </td>
               </tr>
             </tbody>
           </table>
 
-          {products?.products[0]?.repairInfo ? (
+          {productDetails.repairInfo && (
             <div className="mt-4">
               <h3 className="text-xl font-bold mb-2">Repair Info:</h3>
               <p>
                 <strong>Technician Name:</strong>{' '}
-                {products.products[0].repairInfo.technician?.name || 'N/A'}
+                {productDetails.repairInfo.technician?.name || 'N/A'}
               </p>
               <p>
                 <strong>Replaced Components:</strong>{' '}
                 {Object.keys(
-                  products.products[0].repairInfo.repairComponents || {}
-                ).join(', ')}
+                  productDetails.repairInfo.repairComponents || {}
+                ).join(', ') || 'N/A'}
               </p>
             </div>
-          ) : null}
+          )}
 
           <div className="mt-4">
             <h3 className="text-xl font-bold mb-2">All Costs:</h3>
             <p>
-              <strong>Arrival Cost:</strong> €
-              {products?.products[0]?.productPrice || 0}
+              <strong>Arrival Cost:</strong> €{originalPrice || 0}
             </p>
-            {products?.products[0]?.repairInfo && (
+            {productDetails.repairInfo && (
               <>
                 <p>
                   <strong>Cost of Components:</strong> €{costOfComponents}
@@ -135,12 +129,13 @@ const ProductsModal = ({ products, totalPrice, onClose }) => {
               </>
             )}
             <p>
-              <strong>Shipping Cost:</strong> €{products.shippingCost}
+              <strong>Shipping Cost:</strong> €{products.shippingCost || 0}
             </p>
             <p>
               <strong>Total Cost:</strong> €{totalCost.toFixed(2)}
             </p>
           </div>
+
           <div className="mt-4">
             <h3 className="text-xl font-bold text-green-600">
               Net Profit: €{netProfit.toFixed(2)}
