@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Loading from "./Loading";
-import ProductsModal from "./ProductsModal";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import Loading from './Loading';
+import ProductsModal from './ProductsModal';
 
 const SalesStatusData = () => {
   const [salesHistory, setSalesHistory] = useState([]);
@@ -9,50 +9,53 @@ const SalesStatusData = () => {
   const [error, setError] = useState(null);
   const [statusLoading, setStatusLoading] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
-  const [filterText, setFilterText] = useState("");
+  const [filterText, setFilterText] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
-  const [userRole, setUserRole] = useState("");
+  const [userRole, setUserRole] = useState('');
   const [returnDetails, setReturnDetails] = useState({
-    platform: "",
-    reason: "",
+    platform: '',
+    reason: '',
   });
   const [showReturnModal, setShowReturnModal] = useState({
     show: false,
     saleId: null,
     index: null,
   });
+  const [selectedCommission, setSelectedCommission] = useState(1);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setReturnDetails((prev) => ({ ...prev, [name]: value }));
   };
+
   // Retrieve user role from local storage
   const getUserRole = () => {
-    const userDataString = localStorage.getItem("user");
+    const userDataString = localStorage.getItem('user');
     if (userDataString) {
       try {
         const userData = JSON.parse(userDataString);
         const role = userData.user.role;
         setUserRole(role);
       } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
+        console.error('Error parsing user data from localStorage:', error);
       }
     } else {
-      console.error("No user data found in localStorage");
+      console.error('No user data found in localStorage');
     }
   };
+
   const fetchSalesHistory = async () => {
     try {
       const { data } = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/sales`
       );
       console.log(data);
-      
+
       setSalesHistory(data || []);
     } catch (error) {
-      setError("Failed to fetch sales history");
+      setError('Failed to fetch sales history');
     } finally {
       setLoading(false);
     }
@@ -64,9 +67,9 @@ const SalesStatusData = () => {
   }, []);
 
   const handleStatusChange = async (saleId, index, newStatus) => {
-    if (newStatus === "returned") {
+    if (newStatus === 'returned') {
       // Open a modal to collect return details
-      setReturnDetails({ platform: "", reason: "" }); // Reset return details
+      setReturnDetails({ platform: '', reason: '' }); // Reset return details
       setShowReturnModal({ show: true, saleId, index }); // Save current saleId and index
       return;
     }
@@ -89,18 +92,18 @@ const SalesStatusData = () => {
         updatedHistory[index].status = newStatus;
         setSalesHistory(updatedHistory);
       } else {
-        setError("Failed to update status");
+        setError('Failed to update status');
       }
     } catch (error) {
-      console.error("Error updating status:", error);
-      setError("Error updating status");
+      console.error('Error updating status:', error);
+      setError('Error updating status');
     } finally {
       setStatusLoading(null);
     }
   };
 
   const handleDelete = async (saleId, index) => {
-    if (window.confirm("Are you sure you want to delete this sale?")) {
+    if (window.confirm('Are you sure you want to delete this sale?')) {
       try {
         setDeleteLoading(saleId);
 
@@ -115,11 +118,11 @@ const SalesStatusData = () => {
           const updatedHistory = salesHistory.filter((_, i) => i !== index);
           setSalesHistory(updatedHistory);
         } else {
-          setError("Failed to delete the sale");
+          setError('Failed to delete the sale');
         }
       } catch (error) {
-        console.error("Error deleting sale:", error);
-        setError("Error deleting sale");
+        console.error('Error deleting sale:', error);
+        setError('Error deleting sale');
       } finally {
         setDeleteLoading(null);
       }
@@ -130,7 +133,7 @@ const SalesStatusData = () => {
     const { saleId, index } = showReturnModal;
 
     if (!returnDetails.platform || !returnDetails.reason) {
-      alert("Please fill in all return details.");
+      alert('Please fill in all return details.');
       return;
     }
 
@@ -140,29 +143,30 @@ const SalesStatusData = () => {
       const { status } = await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/sales/${saleId}`,
         {
-          status: "returned",
+          status: 'returned',
           returnDetails,
         }
       );
 
       if (status === 200) {
         const updatedHistory = [...salesHistory];
-        updatedHistory[index].status = "returned";
+        updatedHistory[index].status = 'returned';
         setSalesHistory(updatedHistory);
         setShowReturnModal({ show: false, saleId: null, index: null }); // Close modal
       } else {
-        setError("Failed to update status");
+        setError('Failed to update status');
       }
     } catch (error) {
-      console.error("Error submitting return details:", error);
-      setError("Error submitting return details");
+      console.error('Error submitting return details:', error);
+      setError('Error submitting return details');
     } finally {
       setStatusLoading(null);
     }
   };
 
-  const handleViewProducts = (products, totalPrice) => {
+  const handleViewProducts = (products, totalPrice, commission) => {
     setSelectedProducts(products);
+    setSelectedCommission(commission);
     setSelectedTotalPrice(totalPrice);
     setShowModal(true);
   };
@@ -172,7 +176,7 @@ const SalesStatusData = () => {
   };
 
   const filteredSalesHistory = salesHistory.filter((sale) => {
-    const imeiList = sale.products.map((product) => product.imei).join(" ");
+    const imeiList = sale.products.map((product) => product.imei).join(' ');
     return (
       sale.customerName.toLowerCase().includes(filterText.toLowerCase()) ||
       sale.shipmentNumber.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -220,7 +224,9 @@ const SalesStatusData = () => {
                 <tr className="bg-[#0f9bee]" key={sale._id}>
                   <td className="py-2 px-2">{sale.customerName}</td>
                   <td className="py-2 px-2">{sale.shipmentNumber}</td>
-                  <td className="py-2 px-2">{new Date(sale.time).toLocaleDateString()}</td>
+                  <td className="py-2 px-2">
+                    {new Date(sale.time).toLocaleDateString()}
+                  </td>
                   <td className="py-2 px-2">
                     {sale.products &&
                       sale.products.map((product, i) => (
@@ -251,20 +257,24 @@ const SalesStatusData = () => {
                       <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded"
                         onClick={() =>
-                          handleViewProducts(sale, sale.totalPrice)
+                          handleViewProducts(
+                            sale,
+                            sale.totalPrice,
+                            sale.commission
+                          )
                         }
                       >
                         View
                       </button>
-                      {userRole === "superadmin" && (
+                      {userRole === 'superadmin' && (
                         <button
                           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded"
                           onClick={() => handleDelete(sale._id, index)}
                           disabled={deleteLoading === sale._id}
                         >
                           {deleteLoading === sale._id
-                            ? "Deleting..."
-                            : "Delete"}
+                            ? 'Deleting...'
+                            : 'Delete'}
                         </button>
                       )}
                     </div>
@@ -286,6 +296,7 @@ const SalesStatusData = () => {
         <ProductsModal
           products={selectedProducts}
           totalPrice={selectedTotalPrice}
+          commission={selectedCommission}
           onClose={handleCloseModal}
         />
       )}
@@ -293,7 +304,9 @@ const SalesStatusData = () => {
       {showReturnModal.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-[400px]">
-            <h2 className="text-xl font-bold mb-4 text-black">Return Details</h2>
+            <h2 className="text-xl font-bold mb-4 text-black">
+              Return Details
+            </h2>
             <input
               type="text"
               name="platform"
