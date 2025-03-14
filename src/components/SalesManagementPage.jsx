@@ -120,6 +120,7 @@ const SalesManagementPage = () => {
           // parseFloat(product.price) * (parseFloat(formData.commission) / 100),
         };
 
+
         setSales((prevSales) => [...prevSales, newSale]);
 
         // Clear product fields only after the sale is added

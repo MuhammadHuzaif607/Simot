@@ -93,6 +93,10 @@ function StockPage() {
 
   // Filter products by type
   const filterProductsByType = (type) => {
+    if (!Array.isArray(products) || products.length === 0) {
+      return [];
+    }
+
     return products.filter(
       (product) => product.deviceType.toLowerCase() === type
     );
@@ -168,7 +172,6 @@ function StockPage() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      
       <AppBar position="static" className="custom-appbar">
         <Tabs
           value={value}

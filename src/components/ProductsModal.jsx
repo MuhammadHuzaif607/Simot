@@ -2,6 +2,7 @@ const ProductsModal = ({ products, totalPrice, onClose, commission }) => {
   const calculateNetProfit = (product) => {
     const actualPrice = product?.productPrice || 0;
     const soldPrice = products.customTotalPrice || 0;
+    let totalTechnicianCost = products?.products[0]?.repairInfo?.totalCost || 0;
 
     let commissionAmount = soldPrice * (commission / 100);
     const afterCommission = soldPrice - commissionAmount;
@@ -18,7 +19,7 @@ const ProductsModal = ({ products, totalPrice, onClose, commission }) => {
 
       const totalCost =
         actualPrice + costOfComponents + technicianCost + products.shippingCost;
-      const netProfit = afterShippingCost - actualPrice;
+      const netProfit = afterShippingCost - actualPrice - totalTechnicianCost;
 
       return {
         totalCost,
