@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { BarcodeScanner } from 'react-barcode-scanner'; // Import the BarcodeScanner
-import BillModal from './BillModal'; // Import the BillModal component
+import BillModal from './BillModal';
 import { CircularProgress } from '@mui/material';
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS for Toast
-import { ToastContainer, toast } from 'react-toastify'; // Import Toast components
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
 
 const SalesManagementPage = () => {
   const [formData, setFormData] = useState({
@@ -20,14 +19,12 @@ const SalesManagementPage = () => {
   const [sales, setSales] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
-  const [showModal, setShowModal] = useState(false); // For controlling Bill Modal
-  const [bill, setBill] = useState(false); // For controlling Bill Modal
-  const [loading, setLoading] = useState(false); // For controlling Bill Modal
-  const [errorMessage, setErrorMessage] = useState(''); // Error message state
-  const [isScanning, setIsScanning] = useState(false); // Scanner state
-  const [customTotalPrice, setCustomTotalPrice] = useState(''); // To track custom price
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [customTotalPrice, setCustomTotalPrice] = useState('');
   const [confirmationMessage, setConfirmationMessage] = useState('');
-  const [billData, setBillData] = useState({});
+  const [billData, setBillData] = useState(null);
   const dropdownRef = useRef(null);
   const shipmentRef = useRef(null);
 
@@ -41,6 +38,7 @@ const SalesManagementPage = () => {
         setCustomers(response.data);
       } catch (error) {
         console.error('Error fetching customers:', error);
+        toast.error('Failed to load customers');
       }
     };
 
@@ -51,7 +49,7 @@ const SalesManagementPage = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setFilteredCustomers([]); // Close dropdown if clicked outside
+        setFilteredCustomers([]);
       }
     };
 
@@ -59,7 +57,7 @@ const SalesManagementPage = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -84,236 +82,208 @@ const SalesManagementPage = () => {
       customerId: customer._id,
       commission: customer.commission,
     }));
-    setFilteredCustomers([]); // Clear suggestions after selecting
+    setFilteredCustomers([]);
   };
 
   const handleAddProduct = async () => {
-    if (formData.productName && formData.customerName && formData.customerId) {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/products/getproducts/${
-            formData.productName
-          }`
-        );
-        const product = response.data;
+    if (!formData.productName) {
+      setErrorMessage('Please enter product barcode');
+      return;
+    }
 
-        const newSale = {
-          customerName: formData.customerName,
-          customerId: formData.customerId,
-          productName: product.name,
-          productId: product._id,
-          deviceType: product.deviceType,
-          condition: product.condition,
-          grade: product.grade,
-          model: product.deviceModel,
-          brand: product.deviceBrand,
-          color: product.deviceColor,
-          memory: product.memory,
-          imei: product.imei,
-          info: product.info,
-          productPrice: parseFloat(product.price),
-          repairInfo: product.repairInfo,
-          paymentStatus: product.paymentStatus,
-          status: product.status,
-          isRepaired: product.isRepaired,
-          soldRepaired: product.soldRepaired,
-          // parseFloat(product.price) * (parseFloat(formData.commission) / 100),
-        };
+    if (!formData.customerName || !formData.customerId) {
+      setErrorMessage('Please select a customer first');
+      return;
+    }
 
+    try {
+      setErrorMessage('');
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/products/getproducts/${
+          formData.productName
+        }`
+      );
+      const product = response.data;
 
-        setSales((prevSales) => [...prevSales, newSale]);
+      const newSale = {
+        customerName: formData.customerName,
+        customerId: formData.customerId,
+        productName: product.name,
+        productId: product._id,
+        deviceType: product.deviceType,
+        condition: product.condition,
+        grade: product.grade,
+        model: product.deviceModel,
+        brand: product.deviceBrand,
+        color: product.deviceColor,
+        memory: product.memory,
+        imei: product.imei,
+        info: product.info,
+        productPrice: parseFloat(product.price),
+        repairInfo: product.repairInfo,
+        paymentStatus: product.paymentStatus,
+        status: product.status,
+        isRepaired: product.isRepaired,
+        soldRepaired: product.soldRepaired,
+      };
 
-        // Clear product fields only after the sale is added
-
-        setErrorMessage(''); // Clear any previous error message
-
-        // setCustomTotalPrice(product.price);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-
-        if (error.response && error.response.status === 404) {
-          setErrorMessage('Product not Available');
-        } else {
-          // General error handling
-          setErrorMessage('An error occurred while fetching the product.');
-        }
+      setSales((prevSales) => [...prevSales, newSale]);
+      setFormData((prev) => ({ ...prev, productName: '' })); // Clear product field
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      if (error.response?.status === 404) {
+        setErrorMessage('Product not found');
+      } else {
+        setErrorMessage('Error fetching product details');
       }
-    } else {
-      // Set an error message if fields are not filled
-      setErrorMessage('Please enter product name and select customer.');
     }
   };
 
-  // Function to handle removing a sale from the sales array
   const handleRemoveSale = (index) => {
-    const updatedSales = sales.filter((_, i) => i !== index); // Filter out the sale at the specified index
-    setSales(updatedSales); // Update the state with the filtered sales
+    setSales((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const totalPrice = sales.reduce((acc, sale) => acc + sale.productPrice, 0);
+  const calculateTotalPrice = () => {
+    const basePrice = customTotalPrice
+      ? parseFloat(customTotalPrice)
+      : sales.reduce((acc, sale) => acc + sale.productPrice, 0);
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
-
-  const handleBarcodeScan = (data) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      productName: data.text,
-    }));
-    setIsScanning(false);
-  };
-
-  const handleBarcodeError = (error) => {
-    console.error('Barcode scan error:', error);
+    const shippingCost = parseFloat(formData.shippingCost || 0);
+    return basePrice + shippingCost;
   };
 
   const handleSell = async () => {
-    // Final total price to send to the backend (adding shipping cost but not changing UI)
-    const finalTotalPrice = totalPrice + parseFloat(formData.shippingCost || 0); // ✅ Adding shipping cost
+    if (!formData.shipmentNumber) {
+      setConfirmationMessage('Please enter shipment number');
+      shipmentRef.current?.focus();
+      return;
+    }
 
-    // Prepare bill data with commission
-    const billData = {
-      customerName: formData.customerName,
-      customerId: formData.customerId,
-      shipmentNumber: formData.shipmentNumber,
-      shippingCost: formData.shippingCost, // ✅ Send shipping cost
-      totalPrice: finalTotalPrice.toFixed(2), // ✅ Send updated total price
-      commission: formData.commission, // ✅ Include commission
-      customTotalPrice: customTotalPrice,
-      products: sales,
-      time: new Date(),
-    };
-
-    setBillData(billData); // ✅ Update bill data
+    if (sales.length === 0) {
+      setErrorMessage('Please add at least one product');
+      return;
+    }
 
     try {
-      setLoading(true); // ✅ Show loading state
+      setLoading(true);
 
-      // Make API call to save the bill
+      const totalPrice = calculateTotalPrice();
+      const commissionAmount = formData.commission
+        ? (totalPrice * parseFloat(formData.commission)) / 100
+        : 0;
+
+      const billData = {
+        customerName: formData.customerName,
+        customerId: formData.customerId,
+        shipmentNumber: formData.shipmentNumber,
+        shippingCost: formData.shippingCost || 0,
+        totalPrice: totalPrice.toFixed(2),
+        commission: formData.commission,
+        commissionAmount: commissionAmount.toFixed(2),
+        finalAmount: (totalPrice - commissionAmount).toFixed(2),
+        products: sales,
+        time: new Date(),
+      };
+
+      // Save the sale
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/sales`,
         billData
       );
 
       if (response.status === 201) {
-        // ✅ After successfully generating the bill, delete each product
-        for (let sale of sales) {
-          try {
+        // Delete or update products
+        await Promise.all(
+          sales.map(async (sale) => {
             if (!sale.isRepaired) {
               await axios.delete(
                 `${import.meta.env.VITE_API_URL}/api/products/deleteproducts/${
                   sale.productId
                 }`
               );
-              console.log(`Deleted product with ID: ${sale.productId}`);
             } else {
-              const response = await axios.patch(
+              await axios.patch(
                 `${
                   import.meta.env.VITE_API_URL
                 }/api/products/update-sold-flag/${sale.productId}`
               );
-              console.log('Product Updated');
-              console.log('Response', response);
             }
-          } catch (deleteError) {
-            console.error(
-              `Error deleting product with ID: ${sale.productId}`,
-              deleteError
-            );
-          }
-        }
+          })
+        );
 
-        // ✅ Reset form fields
-        setFormData((prevData) => ({
-          ...prevData,
+        // Reset form
+        setFormData({
           customerName: '',
           customerId: '',
           shipmentNumber: '',
           productName: '',
-          shippingCost: '', // ✅ Reset shipping cost
-        }));
+          productPrice: '',
+          commission: '',
+          shippingCost: '',
+        });
+        setCustomTotalPrice('');
+        setSales([]);
+        setBillData(billData);
 
-        setCustomTotalPrice(''); // ✅ Reset custom price
-        setBill(true);
-        toast.success('Item loaded successfully!', {
+        toast.success('Sale completed successfully!', {
           autoClose: 3000,
           hideProgressBar: true,
         });
-        setSales([]);
-        setLoading(false);
-      } else {
-        setLoading(false);
-        alert('Failed to generate bill. Please try again.');
+
+        // Show the bill modal
+        // setShowModal(true);
       }
     } catch (error) {
-      toast.error('An error occurred while adding the product.', {
-        autoClose: 3000,
-        hideProgressBar: true,
-      });
-      console.error('Error generating bill:', error);
-      alert('Failed to generate bill. Please try again.');
+      console.error('Error completing sale:', error);
+      toast.error('Failed to complete sale. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to handle Generate Bill button click
-  const handleGenerateBill = async () => {
-    if (!customTotalPrice) {
-      setErrorMessage('Product price is required.');
+  const handleGenerateBill = () => {
+    if (sales.length === 0) {
+      setErrorMessage('No products added to generate bill');
       return;
     }
 
-    if (!formData.shipmentNumber) {
-      setConfirmationMessage('Device has been inserted correctly.');
-      setTimeout(() => setConfirmationMessage(''), 1000);
-      shipmentRef.current?.focus();
-    } else {
-      handleSell();
-    }
-  };
+    const totalPrice = calculateTotalPrice();
+    const commissionAmount = formData.commission
+      ? (totalPrice * parseFloat(formData.commission)) / 100
+      : 0;
 
-  const generateBill = () => {
-    const finalTotalPrice = customTotalPrice
-      ? parseFloat(customTotalPrice) -
-        parseFloat(formData.commission / 100) * parseFloat(customTotalPrice)
-      : totalPrice;
-    // Prepare bill data
-    const billData = {
+    setBillData({
       customerName: formData.customerName,
       customerId: formData.customerId,
       shipmentNumber: formData.shipmentNumber,
-      totalPrice: finalTotalPrice.toFixed(2),
+      totalPrice: totalPrice.toFixed(2),
+      commission: formData.commission,
+      commissionAmount: commissionAmount.toFixed(2),
+      finalAmount: (totalPrice - commissionAmount).toFixed(2),
       products: sales,
       time: new Date().toLocaleString(),
-    };
-    // setBillData(billData);
+    });
+
     setShowModal(true);
-    // setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
   };
 
   return (
     <div className="w-full text-white">
-      <ToastContainer />{' '}
+      <ToastContainer />
       {confirmationMessage && (
         <p className="text-green-500">{confirmationMessage}</p>
       )}
+
       <div className="flex flex-col lg:flex-row lg:justify-between px-4 mb-4">
         <h1 className="2xl:text-3xl xl:text-xl lg:text-lg font-bold">
           Sales Data Entry
         </h1>
-        {/* <div className="flex items-center">
-          <span className="mr-2">Total:</span>
-          <input
-            type="number"
-            value={customTotalPrice} // Display custom price or default total
-            onChange={(e) => setCustomTotalPrice(e.target.value)} // Update the custom total price
-            className="w-28 p-1 text-black"
-            placeholder="Enter total price"
-          />
-        </div> */}
       </div>
+
       <div className="w-full">
         <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap mb-2 relative">
           <input
@@ -325,10 +295,11 @@ const SalesManagementPage = () => {
             onChange={handleInputChange}
             autoComplete="off"
           />
+
           {filteredCustomers.length > 0 && (
             <div
               ref={dropdownRef}
-              className="absolute bg-white text-black w-full lg:w-1/4 mt-12 rounded shadow-lg"
+              className="absolute bg-white text-black w-full lg:w-1/4 mt-12 rounded shadow-lg z-10"
             >
               {filteredCustomers.map((customer) => (
                 <div
@@ -341,6 +312,7 @@ const SalesManagementPage = () => {
               ))}
             </div>
           )}
+
           <input
             className="w-full lg:w-1/5 p-2 rounded bg-[#26282B] border border-gray-600"
             id="customerId"
@@ -349,6 +321,7 @@ const SalesManagementPage = () => {
             value={formData.customerId}
             readOnly
           />
+
           <input
             className="w-full lg:w-1/5 p-2 rounded bg-[#26282B] border border-gray-600"
             ref={shipmentRef}
@@ -357,6 +330,7 @@ const SalesManagementPage = () => {
             placeholder="Shipment Number"
             value={formData.shipmentNumber}
             onChange={handleInputChange}
+            required
           />
         </div>
 
@@ -369,6 +343,7 @@ const SalesManagementPage = () => {
             value={formData.productName}
             onChange={handleInputChange}
           />
+
           <input
             type="number"
             value={customTotalPrice}
@@ -377,32 +352,19 @@ const SalesManagementPage = () => {
               setCustomTotalPrice(e.target.value);
             }}
             className="w-full lg:w-1/5 p-2 rounded bg-[#26282B] border border-gray-600"
-            placeholder="Enter total price"
+            placeholder="Custom total price (optional)"
           />
+
           <input
             type="number"
-            value={formData.customTotalPrice}
-            name="shippingCost"
-            id="shippingCost"
+            value={formData.shippingCost}
             onChange={handleInputChange}
             className="w-full lg:w-1/5 p-2 rounded bg-[#26282B] border border-gray-600"
-            placeholder="Enter shipping price"
+            placeholder="Shipping cost"
+            id="shippingCost"
           />
         </div>
 
-        {/* <div className="fflex flex-col gap-2 lg:flex-row mb-2">
-          <span className="mr-2">Total:</span>
-        </div> */}
-
-        {/* Barcode Scanner */}
-        {isScanning && (
-          <div className="w-full lg:w-1/5 h-64 bg-black">
-            <BarcodeScanner
-              onScan={handleBarcodeScan}
-              onError={handleBarcodeError}
-            />
-          </div>
-        )}
         <div className="flex gap-2 mb-2">
           <button
             className="w-full lg:w-1/4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
@@ -414,7 +376,6 @@ const SalesManagementPage = () => {
 
         {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
 
-        {/* Conditional rendering for table and button */}
         {sales.length > 0 && (
           <>
             <div className="w-full overflow-auto mt-2 min-h-[200px]">
@@ -430,7 +391,7 @@ const SalesManagementPage = () => {
                       <th className="py-2 text-white">Color</th>
                       <th className="py-2 text-white">Memory</th>
                       <th className="py-2 text-white">IMEI</th>
-                      <th className="py-2 text-white">Product Price</th>
+                      <th className="py-2 text-white">Price</th>
                       <th className="py-2 text-white">Action</th>
                     </tr>
                   </thead>
@@ -446,10 +407,7 @@ const SalesManagementPage = () => {
                         <td className="py-2 px-4">{sale.memory}</td>
                         <td className="py-2 px-4">{sale.imei || 'N/A'}</td>
                         <td className="py-2 px-4">
-                          €
-                          {sale.productPrice
-                            // +  (sale.productPrice * formData.commission) / 100
-                            .toFixed(2)}
+                          €{sale.productPrice.toFixed(2)}
                         </td>
                         <td className="py-2 px-4">
                           <button
@@ -468,37 +426,38 @@ const SalesManagementPage = () => {
 
             <div className="w-full mt-4 gap-2 flex">
               <button
-                className="w-full lg:w-1/4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded disabled:opacity-50 "
-                onClick={handleGenerateBill}
-                disabled={bill}
+                className="w-full lg:w-1/4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded disabled:opacity-50"
+                onClick={handleSell}
+                disabled={loading}
               >
-                {loading && <CircularProgress color="success" size={20} />}
-
-                {bill ? 'SOLD' : 'SELL'}
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : (
+                  'COMPLETE SALE'
+                )}
               </button>
+
               <button
-                className="w-full lg:w-1/4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-                onClick={generateBill}
-                // disabled={!bill}
+                className="w-full lg:w-1/4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+                onClick={handleGenerateBill}
+                disabled={sales.length === 0}
               >
-                Generated Bill
+                PREVIEW BILL
               </button>
             </div>
           </>
         )}
       </div>
-      <BillModal
-        isOpen={showModal}
-        onRequestClose={closeModal}
-        sales={sales}
-        formData={formData}
-        customTotalPrice={customTotalPrice}
-        totalPrice={
-          parseFloat(customTotalPrice) ||
-          // +  (formData.commission / 100) * parseFloat(customTotalPrice)
-          totalPrice
-        } // Pass custom or calculated total price
-      />
+
+      {billData && (
+        <BillModal
+          isOpen={showModal}
+          onRequestClose={closeModal}
+          sales={sales}
+          formData={formData}
+          billData={billData}
+        />
+      )}
     </div>
   );
 };
